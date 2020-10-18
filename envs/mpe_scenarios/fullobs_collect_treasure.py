@@ -98,7 +98,7 @@ class Scenario(BaseScenario):
                         a.color = np.array([0.85, 0.85, 0.85])
 
     def reset_world(self, world):
-        #print("forage_num:",world.forage_num)
+        print("forage_num:",world.forage_num)
         world.forage_num = 0
         # set random initial states
         for i, agent in enumerate(world.agents):
@@ -183,10 +183,10 @@ class Scenario(BaseScenario):
                        for a in self.collectors(world) if a is not agent)
         shape = True
         if agent.holding is None and shape:
-            rew -= 0.1 * min(world.cached_dist_mag[t.i, agent.i] for t in
+            rew -= 0.5 * min(world.cached_dist_mag[t.i, agent.i] for t in
                              self.treasures(world))
         elif shape:
-            rew -= 0.1 * min(world.cached_dist_mag[d.i, agent.i] for d in
+            rew -= 0.5 * min(world.cached_dist_mag[d.i, agent.i] for d in
                              self.deposits(world) if d.d_i == agent.holding)
         # collectors get global reward
         rew += self.global_reward(world)

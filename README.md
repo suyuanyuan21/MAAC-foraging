@@ -1,5 +1,4 @@
 <<<<<<< HEAD
-<<<<<<< HEAD
 # Multi-Actor-Attention-Critic
 Code for [*Actor-Attention-Critic for Multi-Agent Reinforcement Learning*](https://arxiv.org/abs/1810.02912) (Iqbal and Sha 2018)
 
@@ -20,10 +19,6 @@ All training code is contained within `main.py`. To view options simply run:
 ```
 python main.py --help
 ```
-=======
-# MAAC-foraging
-*trying to use MAAC to solve multi-agent foraging problem.
->>>>>>> 53b2694c90708e77c1b3b00bd64602983a36eaf6
 =======
 # MAAC-foraging
 *trying to use MAAC to solve multi-agent foraging problem.

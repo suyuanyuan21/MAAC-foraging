@@ -98,7 +98,7 @@ class Scenario(BaseScenario):
                         a.color = np.array([0.85, 0.85, 0.85])
 
     def reset_world(self, world):
-        #print("forage_num:",world.forage_num)
+        print("forage_num:",world.forage_num)
         world.forage_num = 0
         # set random initial states
         for i, agent in enumerate(world.agents):
@@ -144,6 +144,7 @@ class Scenario(BaseScenario):
         return 0
 
     def is_collision(self, agent1, agent2, world):
+        # 横纵坐标差平方和开根号
         dist = world.cached_dist_mag[agent1.i, agent2.i]
         dist_min = agent1.size + agent2.size
         return True if dist < dist_min else False

@@ -3,4 +3,6 @@ python evaluate.py far_treasure 100-20000-01 1
 conda activate maac
 python main.py fullobs_collect_treasure 106treasure-100step-30000epi
 
-
+#20201026 36treasure，37000次
+python main.py fullobs_collect_treasure 36treasure-100step-50000epi
+python evaluate.py fullobs_collect_treasure 36treasure-100step-50000epi 1

@@ -147,6 +147,8 @@ class MultiAgentEnv(gym.Env):
 
     # set env action for a particular agent
     def _set_action(self, action, agent, action_space, time=None):
+        #print("action:",action)
+        #action: [0. 0. 0. 1. 0.]
         agent.action.u = np.zeros(self.world.dim_p)
         #agent.action.u = array([0.,0.])
         agent.action.c = np.zeros(self.world.dim_c)
@@ -161,33 +163,43 @@ class MultiAgentEnv(gym.Env):
             action = act
         else:
             action = [action]
+        #print("now_action:",action)
+        #now_action: [array([0., 0., 0., 1., 0.], dtype=float32)]
 
         if agent.movable:
             # physical action
             if self.discrete_action_input:
                 agent.action.u = np.zeros(self.world.dim_p)
                 # process discrete action
+                #print("discrete_action[0]:",action[0])
                 if action[0] == 1: agent.action.u[0] = -1.0
                 if action[0] == 2: agent.action.u[0] = +1.0
                 if action[0] == 3: agent.action.u[1] = -1.0
                 if action[0] == 4: agent.action.u[1] = +1.0
             else:
                 #print("action[0]:",action[0])
+                #action[0]: [0. 0. 0. 1. 0.]
                 if self.force_discrete_action:
                     d = np.argmax(action[0])
                     action[0][:] = 0.0
                     action[0][d] = 1.0
                 if self.discrete_action_space:
+                    #True,action[0]: [0. 0. 0. 1. 0.]
                     agent.action.u[0] += action[0][1] - action[0][2]
                     agent.action.u[1] += action[0][3] - action[0][4]
                 else:
-                    #print("action[0]:",action[0])
                     agent.action.u = action[0]
             sensitivity = 5.0
             if agent.accel is not None:
+                #True
                 sensitivity = agent.accel
+            #print("sensitivity:",sensitivity,"agent.action.u:",agent.action.u)
             agent.action.u *= sensitivity
+            #print("new_agent.action.u:",agent.action.u)
             action = action[1:]
+            #print("new_action:",action)
+            #new_action: []
+
         if not agent.silent:
             # communication action
             if self.discrete_action_input:

@@ -48,8 +48,17 @@ def run(config):
                          for i in range(attention_sac.nagents)]
             # get actions as torch Variables
             torch_actions = attention_sac.step(torch_obs, explore=False)
+            #print("torch_actions:",torch_actions)
             # convert actions to numpy arrays
             actions = [ac.data.numpy().flatten() for ac in torch_actions]
+            #actions: [array([0., 0., 0., 0., 1.], dtype=float32), 
+            #          array([0., 1., 0., 0., 0.], dtype=float32), 
+            #          array([0., 0., 0., 0., 1.], dtype=float32), 
+            #          array([0., 0., 0., 1., 0.], dtype=float32), 
+            #          array([0., 0., 1., 0., 0.], dtype=float32),
+            #          array([0., 0., 0., 1., 0.], dtype=float32),
+            #          array([1., 0., 0., 0., 0.], dtype=float32)]
+            #print("actions:",actions)
             obs, rewards, dones, infos = env.step(actions)
             #save obs
             '''

@@ -210,6 +210,7 @@ class World(object):
             if agent.movable:
                 noise = np.random.randn(*agent.action.u.shape) * agent.u_noise if agent.u_noise else 0.0
                 p_force[i] = (agent.mass * agent.accel if agent.accel is not None else agent.mass) * agent.action.u + noise
+        #print("p_force:",p_force)
         return p_force
 
     # gather physical forces acting on entities
@@ -232,6 +233,7 @@ class World(object):
                         if p_force[a] is None:
                             p_force[a] = 0.0
                         p_force[a] = p_force[a] + wf
+        #print("p_force:",p_force)
         return p_force
 
     # integrate（完整的） physical state
@@ -240,10 +242,15 @@ class World(object):
             if not entity.movable: continue
             #print("determine collector%i " %i ,"is" ,entity.collector)
             if not entity.collector: continue #不要deposits
+            #print("i:",i,"p_force[i]:",p_force[i])
             entity.state.p_vel = entity.state.p_vel * (1 - self.damping)
             #damping是衰减率，属于[0，1]，元素的速度会越来越小（why?）
             if (p_force[i] is not None):
+                #print("entity.mass:",entity.mass)
+                #entity.mass = 1.0
                 entity.state.p_vel += (p_force[i] / entity.mass) * self.dt
+                #entity.state.p_vel = (p_force[i] / entity.mass) * self.dt
+                #print("entity.state.p_vel:",entity.state.p_vel)
             if entity.max_speed is not None:
                 speed = np.sqrt(np.square(entity.state.p_vel[0]) + np.square(entity.state.p_vel[1]))
                 if speed > entity.max_speed:

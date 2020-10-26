@@ -21,6 +21,7 @@ class Action(object):
     def __init__(self):
         # physical action
         self.u = None
+        #agent.action.u = array([0.,0.])
         # communication action
         self.c = None
 

@@ -2,3 +2,5 @@ tensorboard --logdir models/fullobs_collect_treasure/lh-01/run7/logs
 python evaluate.py far_treasure 100-20000-01 1
 conda activate maac
 python main.py fullobs_collect_treasure 106treasure-100step-30000epi
+
+

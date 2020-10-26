@@ -119,6 +119,9 @@ class Scenario(BaseScenario):
             landmark.color = world.treasure_colors[landmark.type]
             landmark.state.p_pos = np.random.uniform(low=-bound, high=bound,
                                                      size=world.dim_p)
+            while((-0.1 < landmark.state.p_pos[0]) and (landmark.state.p_pos[0] < 0.1)) and ((-0.1 < landmark.state.p_pos[1]) and (landmark.state.p_pos[1] < 0.1)):
+                landmark.state.p_pos = np.random.uniform(low=-bound, high=bound,
+                                                     size=world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
             landmark.alive = True
         world.calculate_distances()

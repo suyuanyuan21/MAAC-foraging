@@ -98,7 +98,7 @@ class Scenario(BaseScenario):
                         a.color = np.array([0.85, 0.85, 0.85])
 
     def reset_world(self, world):
-        print("forage_num:",world.forage_num)
+        #print("forage_num:",world.forage_num)
         world.forage_num = 0
         # set random initial states
         for i, agent in enumerate(world.agents):

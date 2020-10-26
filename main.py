@@ -123,7 +123,7 @@ if __name__ == '__main__':
                              "model/training contents")
     parser.add_argument("--n_rollout_threads", default=12, type=int)
     parser.add_argument("--buffer_length", default=int(1e6), type=int)
-    parser.add_argument("--n_episodes", default=30000, type=int)
+    parser.add_argument("--n_episodes", default=50000, type=int)
     parser.add_argument("--episode_length", default=100, type=int)
     parser.add_argument("--steps_per_update", default=200, type=int)
     parser.add_argument("--num_updates", default=4, type=int,

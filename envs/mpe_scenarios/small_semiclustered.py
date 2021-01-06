@@ -18,7 +18,7 @@ class Scenario(BaseScenario):
         #word.treasure_types = [0]/[0,1]/.../[0,1,...,num_deposits]
         world.treasure_colors = np.array(
             sns.color_palette(n_colors=num_deposits))
-        num_treasures = num_collectors +250
+        num_treasures = num_collectors + 42
         # add agents
         world.agents = [Agent() for i in range(world.num_agents)]
         for i, agent in enumerate(world.agents):
@@ -103,6 +103,9 @@ class Scenario(BaseScenario):
         world.forage_num = 0
         print("collision_times:",world.collision_times)
         world.collision_times = 0
+        #记录中心点的坐标
+        record_p_pos = np.array([0.0,0.0])
+
         # set random initial states
         for i, agent in enumerate(world.agents):
             #agent.state.p_pos = np.random.uniform(low=-1, high=1,
@@ -117,16 +120,28 @@ class Scenario(BaseScenario):
             else:
                 agent.state.p_pos = np.array([0.0,0.0])
         for i, landmark in enumerate(world.landmarks):
+            type_i = (landmark.i - world.num_agents)//16
+            #type_i记录是第几种聚类类型
             bound = 0.95
             landmark.type = np.random.choice(world.treasure_types)
             landmark.color = world.treasure_colors[landmark.type]
-            landmark.state.p_pos = np.random.uniform(low=-bound, high=bound,
-                                                     size=world.dim_p)
-            while((-0.1 < landmark.state.p_pos[0]) and (landmark.state.p_pos[0] < 0.1)) and ((-0.1 < landmark.state.p_pos[1]) and (landmark.state.p_pos[1] < 0.1)):
-                landmark.state.p_pos = np.random.uniform(low=-bound, high=bound,
-                                                     size=world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
             landmark.alive = True
+
+            if type_i == 0:
+                landmark.state.p_pos = np.random.uniform(low=-bound, high=bound,
+                                                     size=world.dim_p)
+            else:
+                relavant_i = (landmark.i - world.num_agents)%(2**(2*type_i))
+                relavant_x = relavant_i//(2**type_i)
+                relavant_y = relavant_i%(2**type_i)
+                if relavant_i == 0:
+                    landmark.state.p_pos = np.random.uniform(low=-bound, high=bound,
+                                                     size=world.dim_p)
+                    record_p_pos = landmark.state.p_pos
+                else:
+                    landmark.state.p_pos = record_p_pos + [5.01*landmark.size*relavant_x,
+                                                        5.01*landmark.size*relavant_y] 
         world.calculate_distances()
 
     def benchmark_data(self, agent, world):
@@ -157,7 +172,6 @@ class Scenario(BaseScenario):
     def reward(self, agent, world):
         main_reward = (self.collector_reward(agent, world) if agent.collector
                        else self.deposit_reward(agent, world))
-        #print("main_reward:",main_reward)
         return main_reward
 
     def deposit_reward(self, agent, world):
@@ -186,7 +200,7 @@ class Scenario(BaseScenario):
         rew = 0
         # penalize collisions between collectors
         rew -= 5 * sum(self.is_collision(agent, a, world)
-                       for a in self.collectors(world) if a is not agent)              
+                       for a in self.collectors(world) if a is not agent)
         world.collision_times += sum(self.is_collision(agent, a, world)
                        for a in self.collectors(world) if a is not agent)
         shape = True
@@ -248,6 +262,7 @@ class Scenario(BaseScenario):
         closest_treasures = sorted(
             zip(world.cached_dist_mag[treasures, agent.i],
                 treasures))[:n_visible]
+
         n_treasure_types = len(world.treasure_types)
         obs = [agent.state.p_pos, agent.state.p_vel]
         if agent.collector:

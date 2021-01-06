@@ -125,6 +125,7 @@ class World(object):
         self.cache_dists = False
         self.cached_dist_vect = None
         self.cached_dist_mag = None
+        self.collision_times = 0
 
     # return all entities in the world
     @property
@@ -142,6 +143,7 @@ class World(object):
         return [agent for agent in self.agents if agent.action_callback is not None]
 
     def calculate_distances(self):
+        #把各个元素之间的距离写进一个矩阵
         if self.cached_dist_vect is None:
             # initialize distance data structure
             self.cached_dist_vect = np.zeros((len(self.entities),
@@ -160,10 +162,12 @@ class World(object):
             for ib in range(ia + 1, len(self.entities)):
                 entity_b = self.entities[ib]
                 delta_pos = entity_a.state.p_pos - entity_b.state.p_pos
+                #距离差
                 self.cached_dist_vect[ia, ib, :] = delta_pos
                 self.cached_dist_vect[ib, ia, :] = -delta_pos
 
         self.cached_dist_mag = np.linalg.norm(self.cached_dist_vect, axis=2)
+        #x**2+y**2开根号
         self.cached_collisions = (self.cached_dist_mag <= self.min_dists)
 
     def assign_agent_colors(self):
@@ -216,7 +220,10 @@ class World(object):
     # gather physical forces acting on entities
     def apply_environment_force(self, p_force):
         # simple (but inefficient) collision response
+        
         for a,entity_a in enumerate(self.entities):
+            
+            '''
             for b,entity_b in enumerate(self.entities):
                 if(b <= a): continue
                 [f_a, f_b] = self.get_entity_collision_force(a, b)
@@ -226,6 +233,8 @@ class World(object):
                 if(f_b is not None):
                     if(p_force[b] is None): p_force[b] = 0.0
                     p_force[b] = f_b + p_force[b]
+            '''
+        
             if entity_a.movable:
                 for wall in self.walls:
                     wf = self.get_wall_collision_force(entity_a, wall)
@@ -256,6 +265,7 @@ class World(object):
                 if speed > entity.max_speed:
                     entity.state.p_vel = entity.state.p_vel / np.sqrt(np.square(entity.state.p_vel[0]) +
                                                                   np.square(entity.state.p_vel[1])) * entity.max_speed
+            #print("entity.state.p_vel:",entity.state.p_vel * self.dt)
             entity.state.p_pos += entity.state.p_vel * self.dt
 
     def update_agent_state(self, agent):
@@ -276,8 +286,9 @@ class World(object):
             return [None, None] # neither entity moves
         if (entity_a is entity_b):
             return [None, None] # don't collide against itself
-        if self.cache_dists:
+        if self.cache_dists:#和else计算的东西相同
             delta_pos = self.cached_dist_vect[ia, ib]
+            #ia,ib的距离差
             dist = self.cached_dist_mag[ia, ib]
             dist_min = self.min_dists[ia, ib]
         else:
@@ -289,7 +300,11 @@ class World(object):
         # softmax penetration
         k = self.contact_margin
         penetration = np.logaddexp(0, -(dist - dist_min)/k)*k
+        #print("penetration:",penetration)
+        #感觉很像一个数特别小的一个扰动
+        # numpy.logaddexp(x1, x2,..）：log(exp(x1) + exp(x2))
         force = self.contact_force * delta_pos / dist * penetration
+        #force [1,1]二维向量
         if entity_a.movable and entity_b.movable:
             # consider mass in collisions
             force_ratio = entity_b.mass / entity_a.mass

@@ -26,10 +26,10 @@ def run(config):
     attention_sac = AttentionSAC.init_from_save(model_path)
     env = make_env(config.env_id, discrete_action=attention_sac.discrete_action)
     attention_sac.prep_rollouts(device='cpu')
-    ifi = 5 / config.fps  # inter-frame interval
+    ifi = 3 / config.fps  # inter-frame interval
     #f_obs = open("obs_save.txt","a+")
     #logger = SummaryWriter('Documents/obs_save')
-    #reward_logger = SummaryWriter('Documents/reward_save')
+    reward_logger = SummaryWriter('Documents/reward_save')
   
 
 
@@ -42,6 +42,9 @@ def run(config):
         env.render('human')
         for t_i in range(config.episode_length):
             calc_start = time.time()
+            #if (t_i % 100) == 0:
+            #    print("t_i:",t_i)
+            #    print("foraging_num:",env.world.forage_num)
             # rearrange observations to be per agent, and convert to torch Variable
             torch_obs = [Variable(torch.Tensor(obs[i]).view(1, -1),
                                   requires_grad=False)
@@ -71,10 +74,10 @@ def run(config):
             #f_obs.write('\n')
             '''
             #save_rewards
-            '''
+            
             for i in range(len(rewards)):
                 reward_logger.add_scalar('agent%i rewards'%i,rewards[i], t_i)
-            '''
+            
 
             if config.save_gifs:
                 frames.append(env.render('rgb_array')[0])
@@ -94,7 +97,7 @@ def run(config):
 
     #f_obs.close()
     #logger.close()
-    #reward_logger.close()
+    reward_logger.close()
     env.close()
 
 

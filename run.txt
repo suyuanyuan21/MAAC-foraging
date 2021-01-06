@@ -6,3 +6,14 @@ python main.py fullobs_collect_treasure 106treasure-100step-30000epi
 #20201026 36treasure，37000次
 python main.py fullobs_collect_treasure 36treasure-100step-50000epi
 python evaluate.py fullobs_collect_treasure 36treasure-100step-50000epi 1
+python evaluate.py fullobs_collect_treasure_semicluster 36tr-100step-50000epi 1
+python evaluate.py fullobs_collect_treasure_cluster 36tr-100step-50000epi 1
+
+#20201218 48treasure,40000次
+
+conda activate maac
+python main.py small_semiclustered 48treasure-200step-40000epi
+python evaluate.py small_semiclustered 48treasure-200step-40000epi 2
+python evaluate.py fullobs_collect_treasure 48treasure-200step-40000epi 2
+python evaluate.py fullobs_collect_treasure_semicluster 48treasure-200step-40000epi 2
+python evaluate.py fullobs_collect_treasure_cluster 48treasure-200step-40000epi 2

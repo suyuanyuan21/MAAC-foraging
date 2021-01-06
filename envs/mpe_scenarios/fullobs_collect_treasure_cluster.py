@@ -14,6 +14,8 @@ class Scenario(BaseScenario):
         num_collectors = 6
         num_deposits = world.num_agents - num_collectors
         world.treasure_types = list(range(num_deposits))
+        world.collision_times = 0
+        #word.treasure_types = [0]/[0,1]/.../[0,1,...,num_deposits]
         world.treasure_colors = np.array(
             sns.color_palette(n_colors=num_deposits))
         num_treasures = num_collectors +250
@@ -36,7 +38,8 @@ class Scenario(BaseScenario):
             agent.size = 0.017 if agent.collector else 0.1
             agent.accel = 1.5
             agent.initial_mass = 1.0 if agent.collector else 2.25
-            agent.max_speed = 1.0
+            agent.max_speed = 0.4
+            #限制最大速度
         # add treasures
         world.landmarks = [Landmark() for i in range(num_treasures)]
         for i, landmark in enumerate(world.landmarks):
@@ -96,8 +99,10 @@ class Scenario(BaseScenario):
                         a.color = np.array([0.85, 0.85, 0.85])
 
     def reset_world(self, world):
-        #print("forage_num:",world.forage_num)
+        print("forage_num:",world.forage_num)
         world.forage_num = 0
+        print("collision_times:",world.collision_times)
+        world.collision_times = 0
         #记录中心点的坐标
         record_p_pos = np.array([0.0,0.0])
 
@@ -190,12 +195,14 @@ class Scenario(BaseScenario):
         # penalize collisions between collectors
         rew -= 5 * sum(self.is_collision(agent, a, world)
                        for a in self.collectors(world) if a is not agent)
+        world.collision_times += sum(self.is_collision(agent, a, world)
+                       for a in self.collectors(world) if a is not agent)
         shape = True
         if agent.holding is None and shape:
-            rew -= 0.1 * min(world.cached_dist_mag[t.i, agent.i] for t in
+            rew -= 0.5 * min(world.cached_dist_mag[t.i, agent.i] for t in
                              self.treasures(world))
         elif shape:
-            rew -= 0.1 * min(world.cached_dist_mag[d.i, agent.i] for d in
+            rew -= 0.5 * min(world.cached_dist_mag[d.i, agent.i] for d in
                              self.deposits(world) if d.d_i == agent.holding)
         # collectors get global reward
         rew += self.global_reward(world)

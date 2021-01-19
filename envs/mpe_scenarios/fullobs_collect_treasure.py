@@ -238,6 +238,7 @@ class Scenario(BaseScenario):
 
     def observation(self, agent, world):
         n_visible = 7  # number of other agents and treasures visible to each agent
+        nt_visible = 7
         # get positions of all entities in this agent's reference frame
         other_agents = [a.i for a in world.agents if a is not agent]
         #other_agents = [0,2,3,4,5,6]
@@ -247,7 +248,19 @@ class Scenario(BaseScenario):
         treasures = [t.i for t in self.treasures(world)]
         closest_treasures = sorted(
             zip(world.cached_dist_mag[treasures, agent.i],
-                treasures))[:n_visible]
+                treasures))
+        for i in range(7):
+            if (closest_treasures[i][0] > 10*agent.size):
+                nt_visible = i - 1
+                break
+        #print("i,n_visible,nt_visible:",i,n_visible,nt_visible)
+        if(nt_visible == -1):
+            zero_obs = [0]*n_visible
+            closest_treasures = list(zip(zero_obs,zero_obs))
+        else:
+            zero_obs = [0]*(n_visible - nt_visible)
+            closest_treasures = closest_treasures[:nt_visible] + list(zip(zero_obs,zero_obs))
+        #print("closest_treasures:",closest_treasures)
         n_treasure_types = len(world.treasure_types)
         obs = [agent.state.p_pos, agent.state.p_vel]
         if agent.collector:
@@ -259,9 +272,15 @@ class Scenario(BaseScenario):
             obs.append(a.state.p_vel)
             obs.append(self.get_agent_encoding(a, world))
         for _, i in closest_treasures:
-            t = world.entities[i]
-            obs.append(world.cached_dist_vect[i, agent.i])
-            obs.append((np.arange(n_treasure_types) == t.type))
+            if(i == 0):
+                obs.append(np.zeros(world.dim_p))
+                obs.append(np.array([True]))
+            else:
+                t = world.entities[i]
+                obs.append(world.cached_dist_vect[i, agent.i])
+                obs.append((np.arange(n_treasure_types) == t.type))
+                #print("panding:",(np.arange(n_treasure_types) == t.type))
 
+        #print("obs:",obs)
         #print("con_obs:",np.concatenate(obs))
         return np.concatenate(obs)

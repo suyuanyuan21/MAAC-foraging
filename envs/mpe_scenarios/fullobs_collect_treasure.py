@@ -196,6 +196,15 @@ class Scenario(BaseScenario):
         elif shape:
             rew -= 0.5 * min(world.cached_dist_mag[d.i, agent.i] for d in
                              self.deposits(world) if d.d_i == agent.holding)
+        nt_visible = 0#agent 10个size范围内能见food的数量
+        closest_treasures = sorted(
+            zip(world.cached_dist_mag[treasures, agent.i],
+                treasures))
+        for i in range(7):
+            if (closest_treasures[i][0] > 10*agent.size):
+                nt_visible = i - 1
+                break
+        rew += 0.5 * nt_visible
         # collectors get global reward
         rew += self.global_reward(world)
         return rew

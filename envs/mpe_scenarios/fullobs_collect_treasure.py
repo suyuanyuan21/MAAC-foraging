@@ -99,9 +99,9 @@ class Scenario(BaseScenario):
                         a.color = np.array([0.85, 0.85, 0.85])
 
     def reset_world(self, world):
-        print("forage_num:",world.forage_num)
+        #print("forage_num:",world.forage_num)
         world.forage_num = 0
-        print("collision_times:",world.collision_times)
+        #print("collision_times:",world.collision_times)
         world.collision_times = 0
         # set random initial states
         for i, agent in enumerate(world.agents):
@@ -197,6 +197,7 @@ class Scenario(BaseScenario):
             rew -= 0.5 * min(world.cached_dist_mag[d.i, agent.i] for d in
                              self.deposits(world) if d.d_i == agent.holding)
         nt_visible = 0#agent 10个size范围内能见food的数量
+        treasures = [t.i for t in self.treasures(world)]
         closest_treasures = sorted(
             zip(world.cached_dist_mag[treasures, agent.i],
                 treasures))

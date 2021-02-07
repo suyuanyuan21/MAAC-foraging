@@ -253,14 +253,12 @@ class Scenario(BaseScenario):
             if (closest_treasures[i][0] > 10*agent.size):
                 nt_visible = i - 1
                 break
-        #print("i,n_visible,nt_visible:",i,n_visible,nt_visible)
         if(nt_visible == -1):
             zero_obs = [0]*n_visible
             closest_treasures = list(zip(zero_obs,zero_obs))
         else:
             zero_obs = [0]*(n_visible - nt_visible)
             closest_treasures = closest_treasures[:nt_visible] + list(zip(zero_obs,zero_obs))
-        #print("closest_treasures:",closest_treasures)
         n_treasure_types = len(world.treasure_types)
         obs = [agent.state.p_pos, agent.state.p_vel]
         if agent.collector:
@@ -279,8 +277,6 @@ class Scenario(BaseScenario):
                 t = world.entities[i]
                 obs.append(world.cached_dist_vect[i, agent.i])
                 obs.append((np.arange(n_treasure_types) == t.type))
-                #print("panding:",(np.arange(n_treasure_types) == t.type))
 
         #print("obs:",obs)
-        #print("con_obs:",np.concatenate(obs))
         return np.concatenate(obs)

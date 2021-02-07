@@ -27,9 +27,8 @@ def run(config):
     env = make_env(config.env_id, discrete_action=attention_sac.discrete_action)
     attention_sac.prep_rollouts(device='cpu')
     ifi = 3 / config.fps  # inter-frame interval
-    #f_obs = open("obs_save.txt","a+")
     #logger = SummaryWriter('Documents/obs_save')
-    reward_logger = SummaryWriter('Documents/reward_save')
+    #reward_logger = SummaryWriter('Documents/reward_save')
   
 
 
@@ -44,7 +43,6 @@ def run(config):
             calc_start = time.time()
             #if (t_i % 100) == 0:
             #    print("t_i:",t_i)
-            #    print("foraging_num:",env.world.forage_num)
             # rearrange observations to be per agent, and convert to torch Variable
             torch_obs = [Variable(torch.Tensor(obs[i]).view(1, -1),
                                   requires_grad=False)
@@ -69,16 +67,13 @@ def run(config):
                 for j in range(0,61):
                     #print(obs[i][j])
                     logger.add_scalar('agent obs[{}] [{}]'.format(i,j), obs[i][j], t_i)
-                    #f_obs.write(str(obs[i][j]))
-                    #f_obs.write(",")
-            #f_obs.write('\n')
+            '''
             '''
             #save_rewards
             
             for i in range(len(rewards)):
                 reward_logger.add_scalar('agent%i rewards'%i,rewards[i], t_i)
-            
-
+            '''
             if config.save_gifs:
                 frames.append(env.render('rgb_array')[0])
             calc_end = time.time()
@@ -95,9 +90,8 @@ def run(config):
             imageio.mimsave(str(gif_path / ('%i_%i.gif' % (gif_num, ep_i))),
                             frames, duration=ifi)
 
-    #f_obs.close()
     #logger.close()
-    reward_logger.close()
+    #reward_logger.close()
     env.close()
 
 

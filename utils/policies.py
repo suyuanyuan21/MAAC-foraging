@@ -59,12 +59,16 @@ class DiscretePolicy(BasePolicy):
                 return_entropy=False):
         out = super(DiscretePolicy, self).forward(obs)
         probs = F.softmax(out, dim=1)
+        #print("probs:",probs)
+        #probs: 0.0032  0.3802  0.0032  0.6111  0.0023
         on_gpu = next(self.parameters()).is_cuda
         if sample:
             int_act, act = categorical_sample(probs, use_cuda=on_gpu)
         else:
             act = onehot_from_logits(probs)
         rets = [act]
+        #print("rets:",rets)
+        #rets: 0  0  0  1  0
         if return_log_pi or return_entropy:
             log_probs = F.log_softmax(out, dim=1)
         if return_all_probs:
@@ -77,5 +81,6 @@ class DiscretePolicy(BasePolicy):
         if return_entropy:
             rets.append(-(log_probs * probs).sum(1).mean())
         if len(rets) == 1:
+            #print("rets[0]:",rets[0])
             return rets[0]
         return rets

@@ -159,8 +159,8 @@ class World(object):
                     self.min_dists[ib, ia] = min_dist
 
         for ia, entity_a in enumerate(self.entities):
-            for ib in range(ia + 1, len(self.entities)):
-                entity_b = self.entities[ib]
+            for ib in range(ia + 1, len(self.agents)):
+                entity_b = self.agents[ib]
                 delta_pos = entity_a.state.p_pos - entity_b.state.p_pos
                 #距离差
                 self.cached_dist_vect[ia, ib, :] = delta_pos

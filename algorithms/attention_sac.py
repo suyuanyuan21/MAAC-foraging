@@ -226,6 +226,25 @@ class AttentionSAC(object):
                                        'target_critic': self.target_critic.state_dict(),
                                        'critic_optimizer': self.critic_optimizer.state_dict()}}
         torch.save(save_dict, filename)
+    def save_part(self, filename):
+        """
+        Save trained parameters of all agents into one file
+        """
+        self.prep_training(device='cpu')  # move parameters to CPU before saving
+        save_dict = {'init_dict': self.init_dict,
+                     'agent_params': [a.get_params() for a in self.agents],
+                     'critic_params': {'critic': self.critic.state_dict(),
+                                       'target_critic': self.target_critic.state_dict(),
+                                       'critic_optimizer': self.critic_optimizer.state_dict()}}
+        
+        for i,a in enumerate(self.agents):
+            save_dict = {'agent_params':a.get_params()}
+            torch.save(save_dict, filename/('model_agent%i.pt' % i))
+        save_dict = {'init_dict': self.init_dict,
+                     'critic_params': {'critic': self.critic.state_dict(),
+                                       'target_critic': self.target_critic.state_dict(),
+                                       'critic_optimizer': self.critic_optimizer.state_dict()}}
+        torch.save(save_dict, filename/ 'model_critic.pt')
 
     @classmethod
     def init_from_env(cls, env, gamma=0.95, tau=0.01,
@@ -272,6 +291,29 @@ class AttentionSAC(object):
         instance.init_dict = save_dict['init_dict']
         for a, params in zip(instance.agents, save_dict['agent_params']):
             a.load_params(params)
+
+        if load_critic:
+            critic_params = save_dict['critic_params']
+            instance.critic.load_state_dict(critic_params['critic'])
+            instance.target_critic.load_state_dict(critic_params['target_critic'])
+            instance.critic_optimizer.load_state_dict(critic_params['critic_optimizer'])
+        return instance
+
+    @classmethod
+    def init_from_save_part(cls, filename, load_critic=False):
+        """
+        Instantiate instance of this class from file created by 'save' method
+        """
+        save_dict = torch.load(filename / 'model_critic.pt')
+        instance = cls(**save_dict['init_dict'])
+        instance.init_dict = save_dict['init_dict']
+        for i,a in enumerate(instance.agents):
+            save_agent_dict = torch.load(filename / ('model_agent%i.pt' % i))
+            params = save_agent_dict['agent_params']
+            a.load_params(params)
+
+        #for a, params in zip(instance.agents, save_dict['agent_params']):
+        #    a.load_params(params)
 
         if load_critic:
             critic_params = save_dict['critic_params']

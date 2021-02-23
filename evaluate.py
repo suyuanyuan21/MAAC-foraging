@@ -16,14 +16,17 @@ def run(config):
     if config.incremental is not None:
         model_path = model_path / 'incremental' / ('model_ep%i.pt' %
                                                    config.incremental)
+        attention_sac = AttentionSAC.init_from_save(model_path)
+        
     else:
-        model_path = model_path / 'model.pt'
+        model_path = model_path / 'models'
+        print(model_path)
+        attention_sac = AttentionSAC.init_from_save_part(model_path)
 
     if config.save_gifs:
         gif_path = model_path.parent / 'gifs'
         gif_path.mkdir(exist_ok=True)
 
-    attention_sac = AttentionSAC.init_from_save(model_path)
     env = make_env(config.env_id, discrete_action=attention_sac.discrete_action)
     attention_sac.prep_rollouts(device='cpu')
     ifi = 3 / config.fps  # inter-frame interval

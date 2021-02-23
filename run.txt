@@ -17,3 +17,5 @@ python evaluate.py small_semiclustered 48treasure-200step-40000epi 2
 python evaluate.py fullobs_collect_treasure 48treasure-200step-40000epi 2
 python evaluate.py fullobs_collect_treasure_semicluster 48treasure-200step-40000epi 2
 python evaluate.py fullobs_collect_treasure_cluster 48treasure-200step-40000epi 2
+
+be7fdebc4389d71bb4b4bbeede17afda15863060

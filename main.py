@@ -110,7 +110,8 @@ def run(config):
             model.save(run_dir / 'incremental' / ('model_ep%i.pt' % (ep_i + 1)))
             model.save(run_dir / 'model.pt')
 
-    model.save(run_dir / 'model.pt')
+    os.makedirs(run_dir / 'models', exist_ok=True)
+    model.save_part(run_dir / 'models')
     env.close()
     logger.export_scalars_to_json(str(log_dir / 'summary.json'))
     logger.close()

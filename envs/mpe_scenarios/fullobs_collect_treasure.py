@@ -1,6 +1,6 @@
 import numpy as np
 import seaborn as sns
-from multiagent.core import World, Agent, Landmark, Wall
+from multiagent.core import World, Agent, Landmark, Wall, Block
 from multiagent.scenario import BaseScenario
 
 class Scenario(BaseScenario):
@@ -15,10 +15,11 @@ class Scenario(BaseScenario):
         num_deposits = world.num_agents - num_collectors
         world.treasure_types = list(range(num_deposits))
         world.collision_times = 0
+        num_blocks = 3
         #word.treasure_types = [0]/[0,1]/.../[0,1,...,num_deposits]
         world.treasure_colors = np.array(
             sns.color_palette(n_colors=num_deposits))
-        num_treasures = num_collectors +250
+        num_treasures = 256
         # add agents
         world.agents = [Agent() for i in range(world.num_agents)]
         for i, agent in enumerate(world.agents):
@@ -54,6 +55,16 @@ class Scenario(BaseScenario):
             landmark.size = 0.003
             landmark.boundary = False
         world.walls = []
+
+        world.blocks = [Block() for i in range(num_blocks)]
+        for i, blocks in enumerate(world.blocks):
+            blocks.i = i + world.num_agents + num_treasures
+            blocks.name = 'block %d' % i
+            blocks.collide = True
+            blocks.movable = False
+            blocks.size = 0.15
+            blocks.boundary = False
+
         # make initial conditions
         self.reset_world(world)
         self.reset_cached_rewards()
@@ -127,6 +138,13 @@ class Scenario(BaseScenario):
                                                      size=world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
             landmark.alive = True
+        
+        for i, block in enumerate(world.blocks):
+            #print("block.state.p_pos:",block.state.p_pos)
+            block.color = np.array([0.15, 0.15, 0.65])
+            block.state.p_pos = np.random.uniform(-0.8, +0.8, world.dim_p)
+            block.state.p_vel = np.zeros(world.dim_p)
+        
         world.calculate_distances()
 
     def benchmark_data(self, agent, world):

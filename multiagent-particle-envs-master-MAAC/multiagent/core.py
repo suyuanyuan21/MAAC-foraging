@@ -78,6 +78,10 @@ class Landmark(Entity):
      def __init__(self):
         super(Landmark, self).__init__()
 
+class Block(Entity):
+    def __init__(self):
+        super(Block, self).__init__()
+
 # properties of agent entities
 class Agent(Entity):
     def __init__(self):
@@ -108,6 +112,7 @@ class World(object):
         self.agents = []
         self.landmarks = []
         self.walls = []
+        self.blocks = []
         # communication channel dimensionality
         self.dim_c = 0
         # position dimensionality
@@ -130,8 +135,12 @@ class World(object):
     # return all entities in the world
     @property
     def entities(self):
-        return self.agents + self.landmarks
+        #print("self.blocks:",self.blocks)
+        return self.agents + self.landmarks + self.blocks
 
+    @property
+    def entities_all(self):
+        return self.agents + self.landmarks + self.blocks
     # return all agents controllable by external policies
     @property
     def policy_agents(self):

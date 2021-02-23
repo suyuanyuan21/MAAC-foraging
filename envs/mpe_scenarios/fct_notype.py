@@ -13,12 +13,12 @@ class Scenario(BaseScenario):
         world.num_agents = 7
         num_collectors = 6
         num_deposits = world.num_agents - num_collectors
-        world.treasure_types = list(range(num_deposits))
+        #world.treasure_types = list(range(num_deposits))
         world.collision_times = 0
         #word.treasure_types = [0]/[0,1]/.../[0,1,...,num_deposits]
         world.treasure_colors = np.array(
             sns.color_palette(n_colors=num_deposits))
-        num_treasures = num_collectors +250
+        num_treasures = 256
         # add agents
         world.agents = [Agent() for i in range(world.num_agents)]
         for i, agent in enumerate(world.agents):
@@ -29,7 +29,9 @@ class Scenario(BaseScenario):
                 agent.color = np.array([0.85, 0.85, 0.85])
             else:
                 agent.d_i = i - num_collectors
-                agent.color = world.treasure_colors[agent.d_i] * 0.35
+                #agent.color = world.treasure_colors[agent.d_i] * 0.35
+                #print("agent.color:",agent.color)
+                agent.color = np.array(sns.color_palette(n_colors=1))[0] *0.35
                 #agent.movable = False
             agent.collide = True
             agent.silent = True
@@ -46,8 +48,10 @@ class Scenario(BaseScenario):
             landmark.i = i + world.num_agents
             landmark.name = 'treasure %d' % i
             landmark.respawn_prob = 1.0
-            landmark.type = np.random.choice(world.treasure_types)
-            landmark.color = world.treasure_colors[landmark.type]
+            #landmark.type = np.random.choice(world.treasure_types)
+            #landmark.color = world.treasure_colors[landmark.type]
+            landmark.color = np.array(sns.color_palette(n_colors=1))[0]
+            #print("landmark.color:",landmark.color)
             landmark.alive = True
             landmark.collide = False
             landmark.movable = False
@@ -77,31 +81,24 @@ class Scenario(BaseScenario):
                 for a in self.collectors(world):
                     if a.holding is None and self.is_collision(l, a, world):
                         l.alive = False
-                        a.holding = l.type
+                        #a.holding = l.type
+                        a.holding = 0
                         a.color = 0.85 * l.color
                         l.state.p_pos = np.array([-999., -999.])
                         break
-            '''
-            else:
-                if np.random.uniform() <= l.respawn_prob:
-                    bound = 0.95
-                    l.state.p_pos = np.random.uniform(low=-bound, high=bound,
-                                                      size=world.dim_p)
-                    l.type = np.random.choice(world.treasure_types)
-                    l.color = world.treasure_colors[l.type]
-                    l.alive = True
-            '''
+
         for a in self.collectors(world):
             if a.holding is not None:
                 for d in self.deposits(world):
                     if d.d_i == a.holding and self.is_collision(a, d, world):
+                        #print("d.d_i,a.holding:",d.d_i,a.holding)
                         a.holding = None
                         a.color = np.array([0.85, 0.85, 0.85])
 
     def reset_world(self, world):
-        print("forage_num:",world.forage_num)
+        #print("forage_num:",world.forage_num)
         world.forage_num = 0
-        print("collision_times:",world.collision_times)
+        #print("collision_times:",world.collision_times)
         world.collision_times = 0
         # set random initial states
         for i, agent in enumerate(world.agents):
@@ -118,8 +115,9 @@ class Scenario(BaseScenario):
                 agent.state.p_pos = np.array([0.0,0.0])
         for i, landmark in enumerate(world.landmarks):
             bound = 0.95
-            landmark.type = np.random.choice(world.treasure_types)
-            landmark.color = world.treasure_colors[landmark.type]
+            #landmark.type = np.random.choice(world.treasure_types)
+            #landmark.color = world.treasure_colors[landmark.type]
+            landmark.color = np.array(sns.color_palette(n_colors=1))[0]
             landmark.state.p_pos = np.random.uniform(low=-bound, high=bound,
                                                      size=world.dim_p)
             while((-0.1 < landmark.state.p_pos[0]) and (landmark.state.p_pos[0] < 0.1)) and ((-0.1 < landmark.state.p_pos[1]) and (landmark.state.p_pos[1] < 0.1)):
@@ -225,6 +223,7 @@ class Scenario(BaseScenario):
                            self.collectors(world) if a.holding == d.d_i)
         self.global_deposit_reward = rew
 
+    '''
     def get_agent_encoding(self, agent, world):
         encoding = []
         n_treasure_types = len(world.treasure_types)
@@ -235,7 +234,7 @@ class Scenario(BaseScenario):
             encoding.append((np.arange(n_treasure_types) == agent.d_i))
             encoding.append(np.zeros(n_treasure_types))
         return np.concatenate(encoding)
-
+    '''
     def observation(self, agent, world):
         n_visible = 7  # number of other agents and treasures visible to each agent
         nt_visible = 7
@@ -253,33 +252,29 @@ class Scenario(BaseScenario):
             if (closest_treasures[i][0] > 10*agent.size):
                 nt_visible = i - 1
                 break
-        #print("i,n_visible,nt_visible:",i,n_visible,nt_visible)
         if(nt_visible == -1):
             zero_obs = [0]*n_visible
             closest_treasures = list(zip(zero_obs,zero_obs))
         else:
             zero_obs = [0]*(n_visible - nt_visible)
             closest_treasures = closest_treasures[:nt_visible] + list(zip(zero_obs,zero_obs))
-        #print("closest_treasures:",closest_treasures)
-        n_treasure_types = len(world.treasure_types)
         obs = [agent.state.p_pos, agent.state.p_vel]
         if agent.collector:
             # collectors need to know their own state bc it changes
-            obs.append((np.arange(n_treasure_types) == agent.holding))
+            obs.append([not (agent.holding == None)])
         for _, i in closest_agents:
             a = world.entities[i]
             obs.append(world.cached_dist_vect[i, agent.i])
             obs.append(a.state.p_vel)
-            obs.append(self.get_agent_encoding(a, world))
+            #obs.append(self.get_agent_encoding(a, world))
         for _, i in closest_treasures:
             if(i == 0):
                 obs.append(np.zeros(world.dim_p))
-                obs.append(np.array([True]))
+                #obs.append(np.array([True]))
             else:
                 t = world.entities[i]
                 obs.append(world.cached_dist_vect[i, agent.i])
-                obs.append((np.arange(n_treasure_types) == t.type))
-                #print("panding:",(np.arange(n_treasure_types) == t.type))
+                #obs.append((np.arange(n_treasure_types) == t.type))
 
         #print("obs:",obs)
         #print("con_obs:",np.concatenate(obs))

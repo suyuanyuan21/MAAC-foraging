@@ -1,6 +1,6 @@
 import numpy as np
 import seaborn as sns
-from multiagent.core import World, Agent, Landmark, Wall
+from multiagent.core import World, Agent, Landmark, Wall, Deposit
 from multiagent.scenario import BaseScenario
 
 class Scenario(BaseScenario):
@@ -10,9 +10,9 @@ class Scenario(BaseScenario):
         world.cache_dists = True
         world.dim_c = 2
         world.forage_num = 0
-        world.num_agents = 8
+        world.num_agents = 7
         num_collectors = 7
-        num_deposits = world.num_agents - num_collectors
+        num_deposits = 1
         world.collision_times = 0
         world.treasure_colors = np.array(
             sns.color_palette(n_colors=num_deposits))
@@ -51,6 +51,17 @@ class Scenario(BaseScenario):
             landmark.size = 0.003
             landmark.boundary = False
         world.walls = []
+
+        world.deposits = [Deposit() for i in range(num_deposits)]
+        for i, deposits in enumerate(world.deposits):
+            deposits.i = i + world.num_agents + num_treasures
+            deposits.d_i = i
+            deposits.name = 'block %d' % i
+            deposits.collide = True
+            deposits.movable = False
+            deposits.size = 0.1
+            deposits.boundary = False
+
         # make initial conditions
         self.reset_world(world)
         self.reset_cached_rewards()
@@ -60,7 +71,7 @@ class Scenario(BaseScenario):
         return [a for a in world.agents if a.collector]
 
     def deposits(self, world):
-        return [a for a in world.agents if not a.collector]
+        return [d for d in world.deposits]
 
     def reset_cached_rewards(self):
         self.global_collecting_reward = None
@@ -115,6 +126,12 @@ class Scenario(BaseScenario):
                                                      size=world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
             landmark.alive = True
+
+        for i, deposit in enumerate(world.deposits):
+            deposit.color = np.array(sns.color_palette(n_colors=1))[0] *0.35
+            deposit.state.p_pos = np.array([0.2,0.2])
+            deposit.state.p_vel = np.zeros(world.dim_p)
+        
         world.calculate_distances()
 
     def benchmark_data(self, agent, world):
@@ -147,6 +164,7 @@ class Scenario(BaseScenario):
                        else self.deposit_reward(agent, world))
         return main_reward
 
+    '''
     def deposit_reward(self, agent, world):
         rew = 0
         shape = True
@@ -168,6 +186,7 @@ class Scenario(BaseScenario):
                 rew -= 0.1 * np.linalg.norm(closest_avg_dist_vect)
         rew += self.global_reward(world)
         return rew
+    '''
 
     def collector_reward(self, agent, world):
         rew = 0
@@ -192,7 +211,8 @@ class Scenario(BaseScenario):
             self.calc_global_deposit_reward(world)
         if self.global_collecting_reward is None:
             self.calc_global_collecting_reward(world)
-        return self.global_deposit_reward + self.global_collecting_reward
+        return self.global_collecting_reward
+        #return self.global_deposit_reward + self.global_collecting_reward
 
     def calc_global_collecting_reward(self, world):
         rew = 0

@@ -82,6 +82,10 @@ class Block(Entity):
     def __init__(self):
         super(Block, self).__init__()
 
+class Deposit(Entity):
+    def __init__(self):
+        super(Deposit, self).__init__()
+
 # properties of agent entities
 class Agent(Entity):
     def __init__(self):
@@ -113,6 +117,7 @@ class World(object):
         self.landmarks = []
         self.walls = []
         self.blocks = []
+        self.deposits = []
         # communication channel dimensionality
         self.dim_c = 0
         # position dimensionality
@@ -135,12 +140,8 @@ class World(object):
     # return all entities in the world
     @property
     def entities(self):
-        #print("self.blocks:",self.blocks)
-        return self.agents + self.landmarks + self.blocks
+        return self.agents + self.landmarks + self.blocks + self.deposits
 
-    @property
-    def entities_all(self):
-        return self.agents + self.landmarks + self.blocks
     # return all agents controllable by external policies
     @property
     def policy_agents(self):
@@ -223,7 +224,6 @@ class World(object):
             if agent.movable:
                 noise = np.random.randn(*agent.action.u.shape) * agent.u_noise if agent.u_noise else 0.0
                 p_force[i] = (agent.mass * agent.accel if agent.accel is not None else agent.mass) * agent.action.u + noise
-        #print("p_force:",p_force)
         return p_force
 
     # gather physical forces acting on entities
@@ -251,7 +251,6 @@ class World(object):
                         if p_force[a] is None:
                             p_force[a] = 0.0
                         p_force[a] = p_force[a] + wf
-        #print("p_force:",p_force)
         return p_force
 
     # integrate（完整的） physical state

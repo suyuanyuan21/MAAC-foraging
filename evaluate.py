@@ -20,7 +20,6 @@ def run(config):
         
     else:
         model_path = model_path / 'models'
-        print(model_path)
         attention_sac = AttentionSAC.init_from_save_part(model_path)
 
     if config.save_gifs:

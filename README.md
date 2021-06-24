@@ -1,5 +1,5 @@
 <<<<<<< HEAD
-# Multi-Actor-Attention-Critic
+# MAAC-foraging
 Code for Multi-Actor-Attention-Critic Reinforcement Learning for Central Place Foraging Swarms
 
 ## Requirements
